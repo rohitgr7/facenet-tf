@@ -4,3 +4,5 @@ f-env/
 models/
 temp2.jpg
 dataset/
+tmp/
+__pycache__/

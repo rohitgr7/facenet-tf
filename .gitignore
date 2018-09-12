@@ -6,3 +6,6 @@ temp2.jpg
 dataset/
 tmp/
 __pycache__/
+.floydignore
+.floydexpt
+floyd.yml

@@ -29,11 +29,9 @@ def detect_and_align(image_paths, image_size, training=True):
 
             if training:
                 faces.append(aligned_face)
+                break
             else:
                 faces.append((aligned_face, face_rect))
-
-            if training:
-                break
 
         img_faces.append(faces)
 

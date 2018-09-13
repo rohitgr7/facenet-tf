@@ -7,7 +7,7 @@ import tensorflow as tf
 import os
 
 
-def load_image(image_path):
+def _load_image(image_path):
     return np.array(Image.open(image_path))
 
 
@@ -17,7 +17,7 @@ def detect_and_align(images, image_size, meta_dir, training=True):
 
     for image in images:
         if os.path.isfile(image):
-            img = load_image(image)
+            img = _load_image(image)
         else:
             img = image
 
@@ -60,12 +60,12 @@ def _load_model(model_path, input_map=None):
         tf.import_graph_def(graph_def, input_map)
 
     else:
-        meta_file, ckpt_file = get_model_filenames(model_path)
+        meta_file, ckpt_file = _get_model_filenames(model_path)
         saver = tf.train.import_meta_graph(os.path.join(model_path, meta_file), input_map=input_map)
         saver.restore(tf.get_default_session(), os.path.join(model_path, meta_file))
 
 
-def get_model_filenames(model_dir):
+def _get_model_filenames(model_dir):
     files = os.listdir(model_dir)
     meta_file = [f for f in files if f.endswith('.meta')][0]
     ckpt = tf.train.get_checkpoint_state(model_dir)

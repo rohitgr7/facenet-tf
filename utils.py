@@ -15,15 +15,15 @@ def detect_and_align(images, image_size, meta_dir, training=True):
     img_faces = []
     img_rects = []
 
+    predictor_model = os.path.join(meta_dir, 'shape_predictor_68_face_landmarks.dat')
+    face_detector = dlib.get_frontal_face_detector()
+    face_aligner = openface.AlignDlib(predictor_model)
+
     for image in images:
         if os.path.isfile(image):
             img = _load_image(image)
         else:
             img = image
-
-        predictor_model = os.path.join(meta_dir, 'shape_predictor_68_face_landmarks.dat')
-        face_detector = dlib.get_frontal_face_detector()
-        face_aligner = openface.AlignDlib(predictor_model)
 
         detected_faces = face_detector(img, 1)
 
@@ -34,6 +34,7 @@ def detect_and_align(images, image_size, meta_dir, training=True):
 
             aligned_face = face_aligner.align(image_size, img, face_rect, landmarkIndices=openface.AlignDlib.OUTER_EYES_AND_NOSE)
 
+            aligned_face = (aligned_face - np.mean(aligned_face)) / (np.std(aligned_face) + 1e-8)
             faces.append(aligned_face)
 
             if training:
@@ -79,7 +80,7 @@ def get_model_tensors(model_path):
     _load_model(model_path)
     print('Embedding model loaded')
 
-    input_placeholder = tf.get_default_graph().get_tensor_by_name('import/embeddings:0')
+    input_placeholder = tf.get_default_graph().get_tensor_by_name('import/input:0')
     embeddings_tensor = tf.get_default_graph().get_tensor_by_name('import/embeddings:0')
     phase_train_placeholder = tf.get_default_graph().get_tensor_by_name('import/phase_train:0')
 

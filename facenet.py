@@ -80,11 +80,13 @@ def _main(args):
             train_embeddings = np.zeros((num_imgs, embed_size))
             num_batches = math.ceil(num_imgs / args.batch_size)
 
+            face_detector, face_aligner = get_face_detection_models(args.meta_dir)
+
             for i in range(num_batches):
                 st_ix = i * args.batch_size
                 end_ix = min(st_ix + args.batch_size, num_imgs)
                 img_batch_paths = train_paths[st_ix:end_ix]
-                batch_imgs, _ = detect_and_align(img_batch_paths, args.img_size, args.meta_dir)
+                batch_imgs, _ = detect_and_align(img_batch_paths, args.img_size, face_detector, face_aligner)
                 batch_imgs = np.squeeze(batch_imgs)
 
                 if len(batch_imgs.shape) == 3:
@@ -106,7 +108,7 @@ def _main(args):
             with open(args.classifier_path, 'wb') as f:
                 pickle.dump((classifier, ix2names, true_embeds), f)
 
-            test_imgs, _ = detect_and_align(test_paths, args.img_size, args.meta_dir)
+            test_imgs, _ = detect_and_align(test_paths, args.img_size, face_detector, face_aligner)
             test_imgs = np.squeeze(test_imgs)
             test_feed_dict = {input_placeholder: test_imgs, phase_train_placeholder: False}
             test_embeddings = sess.run(embeddings_tensor, feed_dict=test_feed_dict)
@@ -120,7 +122,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--model_path', type=str, default='./models/embed_model/20170512-110547/20170512-110547.pb', help='Pretrained model to get embeddings')
     parser.add_argument('--classifier_path', type=str, default='./models/classifier/model.pkl', help='Path to save the classifier')
-    parser.add_argument('--data_dir', type=str, default='./dataset/fm-3', help='Directory of the training data')
+    parser.add_argument('--data_dir', type=str, default='./dataset/fm-2', help='Directory of the training data')
     parser.add_argument('--meta_dir', type=str, default='./meta', help='Meta directory')
     parser.add_argument('--batch_size', type=int, default=2, help='Batch size for training')
     parser.add_argument('--img_size', type=int, default=160, help='Initial image size for training images')

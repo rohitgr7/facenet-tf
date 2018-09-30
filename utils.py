@@ -11,16 +11,20 @@ def _load_image(image_path):
     return np.array(Image.open(image_path))
 
 
-def detect_and_align(images, image_size, meta_dir, training=True):
-    img_faces = []
-    img_rects = []
-
+def get_face_detection_models(meta_dir):
     predictor_model = os.path.join(meta_dir, 'shape_predictor_68_face_landmarks.dat')
     face_detector = dlib.get_frontal_face_detector()
     face_aligner = openface.AlignDlib(predictor_model)
 
+    return face_detector, face_aligner
+
+
+def detect_and_align(images, image_size, face_detector, face_aligner, training=True):
+    img_faces = []
+    img_rects = []
+
     for image in images:
-        if os.path.isfile(image):
+        if type(image) is str:
             img = _load_image(image)
         else:
             img = image

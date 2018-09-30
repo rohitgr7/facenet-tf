@@ -9,3 +9,4 @@ __pycache__/
 .floydignore
 .floydexpt
 floyd.yml
+videos/

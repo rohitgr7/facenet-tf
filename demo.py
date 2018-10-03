@@ -7,38 +7,8 @@ import tensorflow as tf
 import pickle
 import numpy as np
 
-from utils import *
-
-
-def _detect(embeds, rects, classifier_model, classes, true_embeds):
-    true_ix = []
-
-    for i, embed in enumerate(embeds):
-        if np.any(np.abs(np.sum(true_embeds - embed, axis=-1)) < 0.7):
-            true_ix.append(i)
-
-    if len(true_ix) == 0:
-        return None, None, None
-
-    embeds = embeds[true_ix]
-    rects = rects[true_ix]
-
-    pred_probs = classifier_model.predict_proba(embeds)
-    pred_classes = np.argmax(pred_probs, axis=-1)
-
-    probs = pred_probs[range(pred_probs.shape[0]), pred_classes]
-    pred_names = [classes[p] for p in pred_classes]
-
-    return probs, pred_names, rects
-
-
-def _create_canvas(frame, probs, names, rects):
-    for i in range(len(probs)):
-        cv2.rectangle(frame, (rects[i].left(), rects[i].top()), (rects[i].right(), rects[i].bottom()), (255, 0, 0), 2)
-
-        cv2.putText(frame, names[i], (rects[i].left(), rects[i].top()), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-
-    return frame
+from utils.utils import detect_and_align, get_model_tensors, get_face_detection_models
+from utils.test_utils import detect, create_canvas
 
 
 def _main(args):
@@ -68,14 +38,14 @@ def _main(args):
 
                     feed_dict = {input_placeholder: images, phase_train_placeholder: False}
                     embeds = sess.run(embeddings_tensor, feed_dict=feed_dict)
-                    probs, names, frects = _detect(embeds, rects, classifier_model, classes, true_embeds)
+                    probs, names, frects = detect(embeds, rects, classifier_model, classes, true_embeds)
 
                     if probs is not None:
-                        frame = _create_canvas(frame, probs, names, frects)
+                        frame = create_canvas(frame, probs, names, frects)
 
                 cv2.imshow(window_name, frame)
 
-                if cv2.waitKey(10) & 0xFF == ord('q'):
+                if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
 
     video_capture.release()

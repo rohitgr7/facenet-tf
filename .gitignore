@@ -1,12 +1,11 @@
-meta
+meta/
 tools/openface
 f-env/
 models/
 temp2.jpg
-dataset/
+data
 tmp/
 __pycache__/
 .floydignore
 .floydexpt
 floyd.yml
-videos/
